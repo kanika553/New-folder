@@ -1,64 +1,41 @@
-# import streamlit as st
-# import pandas as pd
+from flask import Flask, jsonify
+import random
+import time
 
-# st.title("My First Streamlit App")
-# st.write("Hello Streamlit")
+app = Flask(__name__)
 
-# # Section 1: Basic Input
-# st.subheader("Section 1: Basic Input")
-# name1 = st.text_input("Enter your name", key="name1")
-# age1 = st.number_input("Enter your age", min_value=1, key="age1")
-# if st.button("Submit", key="btn1"):
-#     st.write("Name:", name1)
-#     st.write("Age:", age1)
+@app.route("/home")
+def home():
+    return "Smart Helmet Backend Running (Flask)"
 
-# st.divider()
+@app.route("/sensor-data")
+def sensor_data():
+    # Simulated eye blink sensor
+    # 0 = eyes closed, 1 = eyes open
+    eye_state = random.choice([0, 1])
 
-# # Section 2: Static Table
-# st.subheader("Section 2: Static Student Table")
-# students = [
-# {"name": "kalai", "age": 19},
-# {"name": "kavya", "age": 20}
-# ]
-# st.table(students)
+    # Simulated MPU6050 values
+    ax = random.randint(-20000, 20000)
+    ay = random.randint(-20000, 20000)
 
-# st.divider()
+    # Head tilt logic
+    head_tilt = False
+    if abs(ax) > 16000 or abs(ay) > 16000:
+        head_tilt = True
 
-# # Section 3: Session State (Persistent Data)
-# st.subheader("Section 3: Add Students (Persistent)")
-# name2 = st.text_input("Enter your name", key="name2")
-# age2 = st.number_input("Enter your age", min_value=1, key="age2")
-# if "student_list" not in st.session_state:
-#     st.session_state.student_list = []
-# if st.button("Submit", key="btn2"):
-#     if name2:
-#         st.session_state.student_list.append({"name": name2, "age": int(age2)})
-#         st.success("Student added")
-#     else:
-#         st.warning("Please enter a name")
-#         st.table(st.session_state.student_list)
+    # Fatigue detection logic
+    if eye_state == 0 and head_tilt:
+        status = "Fatigue Detected"
+    else:
+        status = "Normal Condition"
 
-# st.divider()
+    return jsonify({
+        "eye_state": eye_state,
+        "ax": ax,
+        "ay": ay,
+        "head_tilt": head_tilt,
+        "status": status
+    })
 
-# # Section 4: Bar Chart
-# st.subheader("Section 4: Subject Marks")
-# data = {
-#     "Subject": ["Maths", "Physics", "Chemistry"],
-#     "Marks": [85, 90, 95]
-# }
-# df = pd.DataFrame(data)
-# st.bar_chart(df.set_index("Subject"))
-import streamlit as st
-import pandas as pd
-st.title("My first streamlit app")
-st.write("overtime")
-#orders
-drinks = ["coffee","tea","juice"]
-foods=["dosa","idli","poori"]
-desserts=["ice cream","cake"]
-order_data={
-    "drinks":drinks,
-    "foods":foods,
-    "desserts":desserts
-}
-select=st.selectbox("select your order",["drinks","foods","desserts"])
+if __name__ == "__main__":
+    app.run(debug=True)
